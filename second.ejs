@@ -1,0 +1,248 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+</head>
+<style> 
+
+div#data {        /* this will hide div with id div_id_name */
+  display:none;
+}
+  
+.rangeslider{ 
+    width: 50%; 
+} 
+  
+.myslider { 
+    -webkit-appearance: none; 
+    background: #FCF3CF  ; 
+    width: 50%; 
+    height: 20px; 
+    opacity: 2; 
+   } 
+  
+  
+.myslider::-webkit-slider-thumb { 
+    -webkit-appearance: none; 
+    cursor: pointer; 
+    background: #34495E  ; 
+    width: 5%; 
+    height: 20px; 
+} 
+  
+  
+.myslider:hover { 
+    opacity: 1; 
+} 
+  
+</style> 
+<body> 
+
+<p>Please input your annual cash inflow and outflow details</p>
+<div class="inp">
+    <form id="form1">
+     <label for="annualinvest">Annual Investment: </label><input type="text" id="annualinvest"><br>
+     <!--<button type="submit" value="Submit">Submit</button>-->
+     </form>
+</div>
+
+<p>Use the slider to increment or decrement risk percentage.</p> 
+  
+<div class="rangeslider"> 
+  <input type="range" min="1" max="100" value="10"
+                  class="myslider" id="sliderRange"> 
+  <p>Risk Percentage: <span id="risk"></span></p>
+  <p>Returns Value: <span id="returns"></span></p> 
+</div> 
+
+<div id = "data"><%=data%></div>
+
+<p id="showWeights"></p>
+
+<script type="text/javascript">var data = [];
+data = JSON.parse(document.getElementById("data").innerHTML);
+
+function getMax(data) {
+    var max;
+    for (var i=0 ; i<data.length ; i++) {
+    	
+        if (max == null || parseFloat(data[i].Volatility) > parseFloat(max))
+            max = data[i].Volatility;
+    }
+    return max;
+}
+
+
+var maxRisk = getMax(data);
+//console.log(maxRisk);
+
+
+function getMin(data) {
+    var min;
+    for (var i=0 ; i<data.length ; i++) {
+        if (min == null || parseFloat(data[i].Volatility) < parseFloat(min))
+            min = data[i].Volatility;
+    }
+    return min;
+}
+
+
+var minRisk = getMin(data);
+
+function getMaxR(data) {
+    var maxR;
+    for (var i=0 ; i<data.length ; i++) {
+        if (maxR == null || parseFloat(data[i]["Sharpe Ratio"]) > parseFloat(maxR))
+            maxR = data[i]["Sharpe Ratio"];
+    }
+    return maxR;
+}
+
+
+var maxRatio = getMaxR(data);
+
+function getMinR(data) {
+    var minR;
+    for (var i=0 ; i<data.length ; i++) {
+        if (minR == null || parseFloat(data[i]["Sharpe Ratio"]) < parseFloat(minR))
+            minR = data[i]["Sharpe Ratio"];
+    }
+    return minR;
+}
+
+var minRatio = getMinR(data);
+
+var newval = 0
+
+
+data.forEach(function(dat){
+ 	if(dat["Sharpe Ratio"]==maxRatio){
+ 		newval = dat.Volatility; 
+ 	}
+ 	
+ });
+
+
+newval = ((newval - minRisk)/(maxRisk-minRisk))*99-(-1)
+
+console.log(newval);
+
+//rangeslider.max = maxRisk.Volatility;
+//rangeslider.min = minRisk.Volatility;
+ 
+var inp = document.getElementById("form1");
+var rangeslider = document.getElementById("sliderRange"); 
+var riskpercent = document.getElementById("risk"); 
+var returnval = document.getElementById("returns"); 
+var risk = 0;
+
+rangeslider.value = newval;
+
+
+riskpercent.innerHTML = rangeslider.value; 
+  
+rangeslider.oninput = function() { 
+  riskpercent.innerHTML = this.value; 
+  risk = ((this.value - 1)/99)*(maxRisk-minRisk)-(minRisk*(-1)) ;
+  //console.log(risk);
+
+ data.forEach(function(dat){
+ 	if(dat.Volatility==risk){
+ 		returnval.innerHTML = dat.Returns*document.getElementById("annualinvest").value; 
+
+ 		var col = [];
+        
+        for (var key in dat) {
+            if (col.indexOf(key) === -1) {
+                col.push(key);
+            }
+        }
+        
+
+        // CREATE DYNAMIC TABLE.
+        var table = document.createElement("table");
+
+        // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+
+        var tr = table.insertRow(-1);                   // TABLE ROW.
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // ADD JSON DATA TO THE TABLE AS ROWS.
+        
+
+        tr = table.insertRow(-1);
+
+        for (var j = 0; j < col.length; j++) {
+            var tabCell = tr.insertCell(-1);
+            tabCell.innerHTML = dat[col[j]]*document.getElementById("annualinvest").value;
+        }
+        
+
+        // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+        var divContainer = document.getElementById("showWeights");
+        divContainer.innerHTML = "";
+        divContainer.appendChild(table);
+ 	}
+ });
+} 
+
+inp.oninput = function() {
+
+	risk = ((rangeslider.value - 1)/99)*(maxRisk-minRisk)-(minRisk*(-1)) ;
+	data.forEach(function(dat){
+ 	if(dat.Volatility==risk){
+ 		returnval.innerHTML = dat.Returns*document.getElementById("annualinvest").value; 
+ 	}
+
+ 	var col = [];
+        
+        for (var key in dat) {
+            if (col.indexOf(key) === -1) {
+                col.push(key);
+            }
+        }
+        
+
+        // CREATE DYNAMIC TABLE.
+        var table = document.createElement("table");
+
+        // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
+
+        var tr = table.insertRow(-1);                   // TABLE ROW.
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");      // TABLE HEADER.
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // ADD JSON DATA TO THE TABLE AS ROWS.
+        
+
+        tr = table.insertRow(-1);
+
+        for (var j = 0; j < col.length; j++) {
+            var tabCell = tr.insertCell(-1);
+            tabCell.innerHTML = dat[col[j]]*document.getElementById("annualinvest").value;
+        }
+        
+
+        // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+        var divContainer = document.getElementById("showWeights");
+        divContainer.innerHTML = "";
+        divContainer.appendChild(table);
+ 	
+ });
+
+}
+
+</script> 
+  
+</body> 
+</html> 

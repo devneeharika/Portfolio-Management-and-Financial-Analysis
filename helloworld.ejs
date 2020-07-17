@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<title>Cashflow Chart</title>  
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<style>
+    
+  #piechart {
+    width: 1200px;
+    float: right ;
+    height: 500px;
+    background-color: white;
+    }
+    
+    label {
+    display: inline-block;
+    width: 100px;
+    }
+
+   body, html {
+    height: 100%;
+    background-color: #D2E8FF;
+}
+
+/* The hero image */
+.hero-image {
+  /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/images/finances.jpg");
+
+  /* Set a specific height */
+  height: 100%;
+
+  /* Position and center the image to scale nicely on all screens */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+}
+
+/* Place text in the middle of the image */
+.hero-text {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 200%;
+}
+
+#container {
+    width: 2000px;
+    height: 800px;
+    /*background-color: #ffcc33;*/
+    margin: auto;
+}
+
+    
+input[type=text], select {
+  width: 75%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  
+}
+
+label{
+  font-color: white;
+}
+
+.ipform{
+
+  width: 600px;
+  float: left;
+  height: 500px;
+  border-radius: 5px;
+  background-color: #0B63BD;
+  padding: 20px;
+
+}
+
+    
+</style>
+</head>
+<body>
+
+
+
+<div class="hero-image">
+  <div class="hero-text">
+    <h1>Cashflow</h1>
+    <p>Let's try to understand your finances better</p>
+  </div>
+</div>
+
+<div id="container"
+
+<p>Please input your annual cash inflow and outflow details</p>
+<div class="ipform">
+    <form id="form1" onchange="drawChart(); return false" >
+     <label for="annualincvar">Annual Income: </label><input type="text" id="annualincvar"><br>
+     <label for="houseexpvar">Household Expenses: </label><input type="text"  id="houseexpvar"><br>
+     <label for="emivar">EMI: </label><input type="text"  id="emivar"><br>
+     <label for="otherexpvar">Other Expenses: </label><input type="text" id="otherexpvar"><br>
+     <label for="otherincvar">Other Incomes: </label><input type="text"  id="otherincvar"><br>
+  
+         
+     <!--<button type="submit" value="Submit">Submit</button>-->
+     </form>
+
+  </div>
+ 
+  <div id="piechart"></div>
+
+  </div> 
+
+   <div class="go" >
+    <form id="goForm" action="/second">
+    <div> Savings:<div class="savings">  </div></div>
+     <button type="goBtn" value="Go">Go </button>
+     </form>
+     </div>
+
+ 
+ 
+  <script>
+      //define the chart package
+      google.charts.load('current', {'packages':['corechart']});
+      //set what is supposed to happen when the page loads. You typically want a state of the chart to show on load, but in this case, there is no data on load.
+      //google.charts.setOnLoadCallback(drawChart);
+     
+     //submit requires text inputs to use parseInt to work as numbers
+      function drawChart() {
+       annualinc = parseInt(document.getElementById('annualincvar').value);
+       houseexp = parseInt(document.getElementById('houseexpvar').value);
+       emi = parseInt(document.getElementById('emivar').value);
+       otherexp = parseInt(document.getElementById('otherexpvar').value);
+       otherinc = parseInt(document.getElementById('otherincvar').value);
+       
+       //replace data with variable names
+       var data = google.visualization.arrayToDataTable([
+          ['Task', 'Hours per Week'],
+          ['Anuual Income',     annualinc],
+          ['Household Expenses',      houseexp],
+          ['EMI', emi],
+          ['Other Expenses',    otherexp],
+          ['Other Income',    otherinc]
+        ]);
+        var options = {
+          title: 'Annual Cashflow',
+          pieHole: 0.4,
+        };
+    //the id is the DOM location to draw the chart    
+    var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+    chart.draw(data, options);
+
+    var sav = annualinc+otherinc-houseexp-emi-otherexp;
+    if(sav>=0){
+      console.log(sav);
+      document.querySelector('.savings').innerHTML = sav;
+    }
+    
+ 
+      }
+  </script> 
+      
+</body>
+</html>
